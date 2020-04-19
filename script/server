@@ -3,4 +3,8 @@ export FLASK_DEBUG=true
 export SECRET_KEY=just-some-local-secret
 export GAMEMASTER_CODE=play
 
-pipenv run python app.py
+if [ "${1:-}" == "gunicorn" ]; then
+  pipenv run gunicorn -k eventlet app:app
+else
+  pipenv run python app.py
+fi
