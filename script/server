@@ -1,5 +1,6 @@
 export FLASK_APP=app
 export FLASK_DEBUG=true
+export SECRET_KEY=just-some-local-secret
 export GAMEMASTER_CODE=play
 
 pipenv run python app.py
