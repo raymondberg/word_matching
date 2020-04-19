@@ -1,0 +1,10 @@
+<div class="container">
+  <h2>Games</h2>
+  <form action="/games/create" method="post">
+    <input type="submit" value="Create Game">
+  </form>
+
+  {% for game in games.values() %}
+    <li><a href="/games/{{ game.slug }}">{{ game.slug }}</a>
+  {% endfor %}
+</div>

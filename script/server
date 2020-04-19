@@ -1,0 +1,5 @@
+export FLASK_APP=app
+export FLASK_DEBUG=true
+export GAMEMASTER_CODE=play
+
+pipenv run python app.py

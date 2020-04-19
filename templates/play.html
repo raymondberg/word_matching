@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Cards! - Game {{ game.slug }}{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div id="chat-box-wrapper">
+    <h3> Chat: </h3>
+    <div id="chat-box">
+    </div>
+    <div>
+      <input type="text" id="chat-input"/>
+      <input type="button" value="Send" onclick="sendChat()"/>
+    </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+  <script type="text/javascript" charset="utf-8">
+    function getTime() {
+      var dt = new Date();
+      return dt.toLocaleTimeString();
+    }
+    var game_id = "{{ game.slug }}";
+    var socket = io();
+    socket.on('connect', function() {
+      socket.emit('join', {room_id: '{{ game.slug}}'});
+    });
+
+    function sendChat() {
+      socket.emit('send_chat', {room_id: '{{ game.slug }}', message: $('#chat-input').val()})
+      $('#chat-input').val("")
+    }
+
+    $(document).on('keypress',function(e) {
+      if(e.which == 13) {
+        sendChat()
+      }
+    });
+    socket.on('chat', function(data) {
+      $("<div>" + getTime() + ": " + data + "</div>").appendTo("#chat-box");
+      console.log($("#chat-box").children().length);
+      if ($("#chat-box").children().length > 10) {
+        $("#chat-box").children()[0].remove();
+      }
+    });
+  </script>
+{% endblock custom_js %}
