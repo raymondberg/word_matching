@@ -73,9 +73,9 @@ def create_game():
         Game(slug=slug, cardset=cardset).save()
     return redirect('/')
 
-@require_username
 @app.route('/games/<string:game_slug>')
-def play(game_slug):
+@require_username
+def play(game_slug, **kwargs):
     safe_slug = alphanumeric_only(game_slug)
     if not Game.slug_exists(safe_slug):
         return redirect('/')

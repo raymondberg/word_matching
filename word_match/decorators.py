@@ -1,4 +1,4 @@
-from flask import session
+from flask import redirect, session
 
 from .models import Cardset, Game
 
