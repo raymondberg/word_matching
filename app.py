@@ -30,9 +30,33 @@ def random_string(length=5):
 class Game:
     def __init__(self, slug):
         self.slug = slug
+        self.users = set()
 
-    def to_session(self):
-        return {}
+    def add_user(self, username):
+        if username not in self.users:
+            self.users.add(username)
+            join_room(self.slug)
+            self.emit("chat", username + ' has joined the room.')
+        self.emit_roster()
+
+    def remove_user(self, username):
+        leave_room(self.slug)
+        if username in self.users:
+            self.users.pop(username)
+            self.emit("chat", username + ' has left the room.')
+        self.emit_roster()
+
+    def emit(self, *args, **kwargs):
+        print(f"emitting: {args} {kwargs} room={self.slug}")
+        emit(*args, **kwargs, room=self.slug)
+
+    def emit_chat(self, username, message):
+        if message:
+            self.emit('chat', f'{username}: {message}')
+
+    def emit_roster(self):
+        self.emit("roster", list(self.users))
+
 
 @app.route('/')
 def home():
@@ -109,34 +133,23 @@ def require_valid_game(f):
 @socketio.on('join')
 @require_username
 @require_valid_game
-def handle_my_custom_event(data, username, game):
+def handle_join(data, username, game):
     print(f'received join from: {username} for {game.slug}')
-    join_room(game.slug)
-    emit("chat", username + ' has joined the room.', room=game.slug)
+    game.add_user(username)
 
 @socketio.on('leave')
 @require_username
 @require_valid_game
-def handle_my_custom_event(data):
-    leave_room(room_id)
-    emit("chat", username + ' has left the room.', room=game.slug)
-
-@socketio.on('join')
-@require_username
-@require_valid_game
-def handle_my_custom_event(data, username, game):
-    print(f'received join from: {username} for {game.slug}')
-    join_room(game.slug)
-    emit("chat", username + ' has joined the room.', room=game.slug)
+def handle_leave(data, username, game):
+    print(f'received leave from: {username} for {game.slug}')
+    game.remove_user(username)
 
 @socketio.on('send_chat')
 @require_username
 @require_valid_game
-def handle_my_custom_event(data, username, game):
+def handle_send_chat(data, username, game):
     print(f'received message from: {username} in {game.slug}: {data}')
-    message = data.get('message')
-    if message:
-        emit('chat', f'{username}: {message}', room=game.slug)
+    game.emit_chat(username, data.get('message'))
 
 if __name__ == '__main__':
     socketio.run(app)
