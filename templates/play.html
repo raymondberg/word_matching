@@ -4,14 +4,18 @@
 {% block content %}
 
 <div class="container">
-  <div id="chat-box-wrapper">
+  <div class="container">
+    <h3> Players: </h3>
+    <div id="roster">
+    </div>
+  </div>
+  <div class="container">
     <h3> Chat: </h3>
     <div id="chat-box">
     </div>
     <div>
       <input type="text" id="chat-input"/>
       <input type="button" value="Send" onclick="sendChat()"/>
-    </div>
     </div>
   </div>
 </div>
@@ -46,6 +50,13 @@
       if ($("#chat-box").children().length > 10) {
         $("#chat-box").children()[0].remove();
       }
+    });
+
+    socket.on('roster', function(data) {
+      $("#roster").empty();
+      data.forEach(function (member) {
+        $("<div>" + member + "</div>").appendTo("#roster");
+      });
     });
   </script>
 {% endblock custom_js %}

@@ -33,9 +33,9 @@ class Game:
         self.users = set()
 
     def add_user(self, username):
+        join_room(self.slug)
         if username not in self.users:
             self.users.add(username)
-            join_room(self.slug)
             self.emit("chat", username + ' has joined the room.')
         self.emit_roster()
 
