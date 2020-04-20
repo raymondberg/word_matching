@@ -1,6 +1,7 @@
 import json
 
 from flask import (
+    jsonify,
     redirect,
     request,
     render_template,
@@ -52,6 +53,15 @@ def cardsets_create():
                 response_cards=cardset_data['response_cards']
             ).save()
     return redirect('/')
+
+@require_username
+@app.route('/cardsets/<string:cardset_slug>')
+def cardsets_view(cardset_slug):
+    safe_slug = alphanumeric_only(cardset_slug)
+    if not Cardset.slug_exists(safe_slug):
+        return redirect('/')
+
+    return jsonify(dict(Cardset.from_slug(safe_slug)))
 
 @require_gamemaster
 @app.route('/games/create', methods=['POST'])
