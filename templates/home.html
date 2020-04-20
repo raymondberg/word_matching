@@ -8,8 +8,8 @@
  <div>Welcome, {{ session['username'] }}!</div>
  <div><em>Not {{ session['username'] }}? No worries, <a href="/login">change your name!</a></em></div>
 
-<h2>Join a game</h2>
-<div>Enter your game code: <input id="game-code" type="text" /><input type="button" value="Join" onclick="joinGame()"/></div>
+  <h2>Join a game</h2>
+  <div>Enter your game code: <input id="game-code" type="text" /><input type="button" value="Join" onclick="joinGame()"/></div>
 {% else %}
 {% include 'login.html' %}
 {% endif %}

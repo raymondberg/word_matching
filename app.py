@@ -1,7 +1,8 @@
+import json
 import os
 import re
-import string
 import random
+import string
 
 from flask import (
     Flask,
@@ -19,6 +20,7 @@ app.config['GAMEMASTER_CODE'] = os.environ['GAMEMASTER_CODE']
 socketio = SocketIO(app)
 
 games = {}
+cardsets = {}
 unambiguous_characters = [
   c for c in string.ascii_uppercase + string.digits if c not in 'B8G6I1l0OQDS5Z2'
 ]
@@ -26,12 +28,36 @@ unambiguous_characters = [
 def alphanumeric_only(value):
     return re.sub(r'[^A-Za-z0-9_ -]', '', value)
 
+def is_gamemaster():
+    return session.get('is_gamemaster', False)
+
 def random_string(length=5):
     return ''.join(random.choice(unambiguous_characters) for x in range(length))
 
-class Game:
-    def __init__(self, slug):
+def slug_for_resource(resource):
+    while True:
+        slug = random_string()
+        if slug not in resource:
+            return slug
+
+def require_gamemaster(f):
+    def require_gamemaster_(*args, **kwargs):
+        if is_gamemaster():
+            return f(*args, **kwargs)
+        return redirect('/')
+    return require_gamemaster_
+
+class Cardset:
+    def __init__(self, slug, name, prompt_cards, response_cards):
         self.slug = slug
+        self.name = name
+        self.prompt_cards = [c for c in prompt_cards if "PICK " not in c]
+        self.response_cards = response_cards
+
+class Game:
+    def __init__(self, slug, cardset):
+        self.slug = slug
+        self.cardset = cardset
         self.users = set()
 
     def add_user(self, username):
@@ -62,7 +88,7 @@ class Game:
 
 @app.route('/')
 def home():
-    return render_template('home.html', games=games)
+    return render_template('home.html', cardsets=cardsets, games=games)
 
 
 @app.route('/login', methods=['GET','POST'])
@@ -87,17 +113,33 @@ def login():
 
     return redirect('/')
 
+@require_gamemaster
+@app.route('/cardsets/create', methods=['POST'])
+def cardsets_create():
+    upload = request.files.get('cardset-file')
+    if upload and upload.filename and upload.filename.endswith('.json'):
+        cardset_data = json.load(upload)
+        if cardset_data.get('response_cards') and cardset_data.get('prompt_cards'):
+            slug = slug_for_resource(cardsets)
+            print(f"Saving cardset {slug}")
+            cardsets[slug] = Cardset(
+                slug,
+                name=request.form.get('name') or random_string(4),
+                prompt_cards=cardset_data['prompt_cards'],
+                response_cards=cardset_data['response_cards']
+            )
+    return redirect('/')
 
+@require_gamemaster
 @app.route('/games/create', methods=['POST'])
 def create_game():
-    while True:
-        slug = random_string()
-        if slug in games:
-            continue
-        print(f"Saving game {slug}")
-        games[slug] = Game(slug=slug)
+    slug = slug_for_resource(games)
+    cardset = cardsets.get(request.form.get('cardset'))
+    if cardset:
+        print(f"Saving game {slug} for cardset {cardset.name}")
+        games[slug] = Game(slug=slug, cardset=cardset)
         print(games)
-        return redirect('/')
+    return redirect('/')
 
 @app.route('/games/<string:game_slug>')
 def play(game_slug):

@@ -1,6 +1,23 @@
 <div class="container">
+  <h2>Cardsets</h2>
+  <form action="/cardsets/create" method="post" enctype="multipart/form-data">
+    <div>Name: <input type="text" name="name"></div>
+    <div>Choose a file: <input type="file" name="cardset-file"/></div>
+    <div><input type="submit" value="Upload Cardset"></div>
+  </form>
+  {% for cardset in cardsets.values() %}
+    <li><a href="/cardsets/{{ cardset.slug }}">{{ cardset.name }}</a>
+  {% endfor %}
+</div>
+
+<div class="container">
   <h2>Games</h2>
   <form action="/games/create" method="post">
+    <select name="cardset">
+      {% for cardset in cardsets.values() %}
+        <option value="{{ cardset.slug }}">{{ cardset.name }}</option>
+      {% endfor %}
+    </select>
     <input type="submit" value="Create Game">
   </form>
 
