@@ -4,7 +4,7 @@ export SECRET_KEY=just-some-local-secret
 export GAMEMASTER_CODE=play
 
 if [ "${1:-}" == "gunicorn" ]; then
-  pipenv run gunicorn -k eventlet app:app
+  pipenv run gunicorn -k eventlet word_match.app:app
 else
-  pipenv run python app.py
+  pipenv run python run.py
 fi
