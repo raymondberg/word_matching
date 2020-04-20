@@ -19,13 +19,15 @@ app.config['GAMEMASTER_CODE'] = os.environ['GAMEMASTER_CODE']
 socketio = SocketIO(app)
 
 games = {}
+unambiguous_characters = [
+  c for c in string.ascii_uppercase + string.digits if c not in 'B8G6I1l0OQDS5Z2'
+]
 
 def alphanumeric_only(value):
     return re.sub(r'[^A-Za-z0-9_ -]', '', value)
 
 def random_string(length=5):
-    chars = string.ascii_uppercase + string.digits
-    return ''.join(random.choice(chars) for x in range(length))
+    return ''.join(random.choice(unambiguous_characters) for x in range(length))
 
 class Game:
     def __init__(self, slug):
