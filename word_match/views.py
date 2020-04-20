@@ -7,14 +7,14 @@ from flask import (
     session
 )
 
-from .app import app, games, cardsets
-from .decorators import require_gamemaster
+from .app import app
+from .decorators import require_gamemaster, require_username
 from .models import Cardset, Game
 from .utils import alphanumeric_only, slug_for_resource
 
 @app.route('/')
 def home():
-    return render_template('home.html', cardsets=cardsets, games=games)
+    return render_template('home.html', cardsets=Cardset.all_slugs(), games=Game.all_slugs())
 
 
 @app.route('/login', methods=['GET','POST'])
@@ -46,36 +46,30 @@ def cardsets_create():
     if upload and upload.filename and upload.filename.endswith('.json'):
         cardset_data = json.load(upload)
         if cardset_data.get('response_cards') and cardset_data.get('prompt_cards'):
-            slug = slug_for_resource(cardsets)
-            print(f"Saving cardset {slug}")
-            cardsets[slug] = Cardset(
-                slug,
+            Cardset(
                 name=request.form.get('name') or random_string(4),
                 prompt_cards=cardset_data['prompt_cards'],
                 response_cards=cardset_data['response_cards']
-            )
+            ).save()
     return redirect('/')
 
 @require_gamemaster
 @app.route('/games/create', methods=['POST'])
 def create_game():
-    slug = slug_for_resource(games)
-    cardset = cardsets.get(request.form.get('cardset'))
+    slug = slug_for_resource(Game)
+    cardset = Cardset.from_slug(request.form.get('cardset'))
     if cardset:
         print(f"Saving game {slug} for cardset {cardset.name}")
-        games[slug] = Game(slug=slug, cardset=cardset)
-        print(games)
+        Game(slug=slug, cardset=cardset).save()
     return redirect('/')
 
+@require_username
 @app.route('/games/<string:game_slug>')
 def play(game_slug):
-    if not session.get('username'):
-        return redirect('/')
-
     safe_slug = alphanumeric_only(game_slug)
-    if safe_slug not in games:
+    if not Game.slug_exists(safe_slug):
         return redirect('/')
 
-    return render_template('play.html', game=games[safe_slug])
+    return render_template('play.html', game=Game.from_slug(safe_slug))
 
 all_loaded = True

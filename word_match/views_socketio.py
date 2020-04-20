@@ -1,10 +1,10 @@
 from flask import session
 
 from .app import socketio
-from .decorators import require_username, require_valid_game
+from .decorators import require_username_or_except, require_valid_game
 
 @socketio.on('join')
-@require_username
+@require_username_or_except(ConnectionRefusedError)
 @require_valid_game
 def handle_join(data, username, game):
     print(f'received join from: {username} for {game.slug}')
@@ -12,7 +12,7 @@ def handle_join(data, username, game):
 
 
 @socketio.on('leave')
-@require_username
+@require_username_or_except(ConnectionRefusedError)
 @require_valid_game
 def handle_leave(data, username, game):
     print(f'received leave from: {username} for {game.slug}')
@@ -20,7 +20,7 @@ def handle_leave(data, username, game):
 
 
 @socketio.on('send_chat')
-@require_username
+@require_username_or_except(ConnectionRefusedError)
 @require_valid_game
 def handle_send_chat(data, username, game):
     print(f'received message from: {username} in {game.slug}: {data}')

@@ -5,8 +5,8 @@
     <div>Choose a file: <input type="file" name="cardset-file"/></div>
     <div><input type="submit" value="Upload Cardset"></div>
   </form>
-  {% for cardset in cardsets.values() %}
-    <li><a href="/cardsets/{{ cardset.slug }}">{{ cardset.name }}</a>
+  {% for cardset in cardsets %}
+    <li><a href="/cardsets/{{ cardset }}">{{ cardset }}</a>
   {% endfor %}
 </div>
 
@@ -14,14 +14,14 @@
   <h2>Games</h2>
   <form action="/games/create" method="post">
     <select name="cardset">
-      {% for cardset in cardsets.values() %}
-        <option value="{{ cardset.slug }}">{{ cardset.name }}</option>
+      {% for cardset in cardsets %}
+        <option value="{{ cardset }}">{{ cardset }}</option>
       {% endfor %}
     </select>
     <input type="submit" value="Create Game">
   </form>
 
-  {% for game in games.values() %}
-    <li><a href="/games/{{ game.slug }}">{{ game.slug }}</a>
+  {% for game in games %}
+    <li><a href="/games/{{ game }}">{{ game }}</a>
   {% endfor %}
 </div>

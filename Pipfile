@@ -10,6 +10,8 @@ flask = "*"
 flask-socketio = "*"
 gunicorn = "*"
 eventlet = "*"
+redis = "*"
+flask-session = "*"
 
 [requires]
 python_version = "3.8"

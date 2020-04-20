@@ -1,7 +1,12 @@
 export FLASK_APP=app
 export FLASK_DEBUG=true
-export SECRET_KEY=just-some-local-secret
 export GAMEMASTER_CODE=play
+export SECRET_KEY=just-some-local-secret
+
+export SESSION_STORE='redis://localhost:63790'
+
+(  docker ps | grep -q word_match_redis && echo "Docker redis already running" ) \
+  || docker run --name word_match_redis -p 63790:6379 -d redis
 
 if [ "${1:-}" == "gunicorn" ]; then
   pipenv run gunicorn -k eventlet word_match.app:app

@@ -19,5 +19,5 @@ def random_string(length=5):
 def slug_for_resource(resource):
     while True:
         slug = random_string()
-        if slug not in resource:
+        if not resource.slug_exists(slug):
             return slug
