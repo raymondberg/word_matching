@@ -4,18 +4,27 @@
 {% block content %}
 
 <div class="container">
-  <div class="container">
-    <h3> Players: </h3>
-    <div id="roster">
+  <div class="row">
+    <div class="col-md-8">
+      <div class="container" style="padding-top: 1em; padding-bottom: 1em; border: 2px solid black">
+        <h3 id="game-state"></h3>
+      </div>
     </div>
-  </div>
-  <div class="container">
-    <h3> Chat: </h3>
-    <div id="chat-box">
-    </div>
-    <div>
-      <input type="text" id="chat-input"/>
-      <input type="button" value="Send" onclick="sendChat()"/>
+    <div class="col-md-4">
+      <div class="container" style="padding-top: 1em; padding-bottom: 1em; border: 2px solid black">
+        <h3> Players: </h3>
+        <div id="roster">
+        </div>
+      </div>
+      <div class="container" style="height: 25em; overflow:auto; margin-top: 1em; padding-top: 1em; padding-bottom: 1em; border: 2px solid black">
+        <h3> Chat: </h3>
+        <div id="chat-box">
+        </div>
+        <div>
+          <input type="text" id="chat-input"/>
+          <input type="button" value="Send" onclick="sendChat()"/>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -57,6 +66,9 @@
       data["users"].forEach(function (member) {
         $("<div>" + member + "</div>").appendTo("#roster");
       });
+
+      var state_text = "Not Started - Waiting for more players to deal in"
+      $("#game-state").html(state_text);
     });
   </script>
 {% endblock custom_js %}
