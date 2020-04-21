@@ -62,10 +62,17 @@ class Cardset(RedisModel):
 
 class Game(RedisModel):
     REDIS_PREFIX = 'games'
-    FIELDS = ['slug', 'cardset_slug', 'usernames']
+    FIELDS = ['slug', 'state', 'cardset_slug', 'usernames']
 
-    def __init__(self, slug, cardset=None, cardset_slug=None, usernames=None):
+    class State:
+        NOT_STARTED = 'not_started'
+        WAIT_FOR_ROUND = 'wait_for_round'
+        RESPONDING = 'responding'
+        REVIEWING = 'reviewing'
+
+    def __init__(self, slug, cardset=None, cardset_slug=None, usernames=None, state=None):
         self.slug = slug
+        self.state = state or self.__class__.State.NOT_STARTED
 
         if cardset_slug:
             self.cardset = Cardset.from_slug(cardset_slug)
@@ -87,14 +94,14 @@ class Game(RedisModel):
             self.usernames.append(username)
             self.save()
             self.emit('chat', username + ' has joined the room.')
-        self.emit_roster()
+        self.emit_state()
 
     def remove_user(self, username):
         leave_room(self.slug)
         if username in self.usernames:
             self.usernames.pop(username)
             self.emit('chat', username + ' has left the room.')
-        self.emit_roster()
+        self.emit_state()
 
     def emit(self, *args, **kwargs):
         print(f'emitting: {args} {kwargs} room={self.slug}')
@@ -104,5 +111,8 @@ class Game(RedisModel):
         if message:
             self.emit('chat', f'{username}: {message}')
 
-    def emit_roster(self):
-        self.emit('roster', self.usernames)
+    def emit_state(self):
+        self.emit('game_state', self._state_details())
+
+    def _state_details(self):
+        return {'state': self.state, 'users': self.usernames}
