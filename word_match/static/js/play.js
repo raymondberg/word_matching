@@ -49,7 +49,7 @@ socket.on('send_deck', function(data) {
   data.forEach(function (card) {
     var cardElement = $("<div>", {class: 'player-card'});
     if (playerActive) {
-      cardElement.text(card);
+      cardElement.html(card);
       cardElement.addClass('up');
     } else {
       cardElement.text("CardMatch!");

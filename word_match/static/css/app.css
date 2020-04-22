@@ -14,12 +14,20 @@ body {
   background-color: #BADEFC;
 }
 
+.space-up { margin-top: 1em }
+.pad-left { padding-left: 1em }
+
 .game-tile {
    border: 2px solid black;
    padding-bottom: 1em;
    padding-top: 1em;
    background-color: #444;
    color: white;
+}
+
+.game-tile a {
+  color: #999;
+  font-weight: bold;
 }
 
 #chat-tile {
@@ -48,6 +56,10 @@ body {
 
 .player-card {
   padding: 1em .5em .5em 1em;
+}
+
+.player-card a {
+  color: #FFF;
 }
 
 .player-card.up {

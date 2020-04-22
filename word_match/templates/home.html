@@ -3,8 +3,9 @@
 
 {% block content %}
 
-<div class="container">
+<div class="game-tile space-up pad-left">
 {% if session['username'] %}
+
  <div>Welcome, {{ session['username'] }}!</div>
  <div><em>Not {{ session['username'] }}? No worries, <a href="/login">change your name!</a></em></div>
 
