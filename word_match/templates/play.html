@@ -1,22 +1,23 @@
 {% extends 'base.html' %}
-{% block title %}Cards! - Game {{ game.slug }}{% endblock %}
+{% block title %}CardMatch! - Game {{ game.slug }}{% endblock %}
 
 {% block content %}
-
-<div class="container">
   <div class="row">
-    <div class="col-md-8">
-      <div class="container" style="padding-top: 1em; padding-bottom: 1em; border: 2px solid black">
-        <h3 id="game-state"></h3>
+    <div class="col-md-9" style="padding-right: 0">
+      <div class="container game-tile">
+        <div id="game-area"></div>
+        <div id="my-deck" class="row"></div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="container" style="padding-top: 1em; padding-bottom: 1em; border: 2px solid black">
+    <div class="col-md-3">
+      <div class="container game-tile">
+        <div id="game-state"></div>
+        <div id="game-help"></div>
         <h3> Players: </h3>
         <div id="roster">
         </div>
       </div>
-      <div class="container" style="height: 25em; overflow:auto; margin-top: 1em; padding-top: 1em; padding-bottom: 1em; border: 2px solid black">
+      <div class="container game-tile" id="chat-tile">
         <h3> Chat: </h3>
         <div id="chat-box">
         </div>
@@ -27,82 +28,13 @@
       </div>
     </div>
   </div>
-</div>
 {% endblock %}
 
 {% block custom_js %}
-  <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
-  <script type="text/javascript" charset="utf-8">
-    function getTime() {
-      var dt = new Date();
-      return dt.toLocaleTimeString();
-    }
-    var gameId = "{{ game.slug }}";
-    var myUsername = "{{ session['username'] }}";
-    var socket = io();
-    socket.on('connect', function() {
-      socket.emit('join', {room_id: gameId});
-    });
-
-    function sendChat() {
-      socket.emit('send_chat', {room_id: gameId, message: $('#chat-input').val()})
-      $('#chat-input').val("")
-    }
-
-    function deckUp() {
-      socket.emit('deck_up', {room_id: gameId})
-    }
-
-    function deckDown() {
-      socket.emit('deck_down', {room_id: gameId})
-    }
-
-    $(document).on('keypress',function(e) {
-      if(e.which == 13) {
-        sendChat()
-      }
-    });
-    socket.on('chat', function(data) {
-      $("<div>" + getTime() + ": " + data + "</div>").appendTo("#chat-box");
-      console.log($("#chat-box").children().length);
-      if ($("#chat-box").children().length > 10) {
-        $("#chat-box").children()[0].remove();
-      }
-    });
-
-    socket.on('game_state', function(data) {
-      $("#roster").empty();
-      data.users.forEach(function (username) {
-        var userEntry = $("<div>", {class: "row"});
-        var userSummary = $("<div>", {class: "col-md-6"});
-        var userAction = $("<div>", {class: "col-md-6"});
-
-        if(username == myUsername) {
-          var button = $("<input/>", {type: "button"});
-          if(data.players.includes(username)) {
-              button.val("Sit out");
-              button.click(deckDown)
-          } else {
-              button.val("Deal me in");
-              button.click(deckUp)
-          }
-          button.appendTo(userAction);
-        } else {
-          if(data.players.includes(username)) {
-            userAction.text("Playing");
-          } else {
-            userAction.text("Watching");
-          }
-        }
-
-        userSummary.text(username)
-        userSummary.appendTo(userEntry);
-        userAction.appendTo(userEntry);
-        userEntry.appendTo("#roster");
-      });
-
-      var state_text = "Not Started - Waiting for more players to deal in";
-      $("#game-state").html(state_text);
-    });
-  </script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script>
+  var gameId = "{{ game.slug }}";
+  var myUsername = "{{ session['username'] }}";
+</script>
+<script src="{{ url_for('static', filename='js/play.js') }}"></script>
 {% endblock custom_js %}

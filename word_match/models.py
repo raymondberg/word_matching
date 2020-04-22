@@ -1,5 +1,8 @@
 import json
+import random
+
 from flask_socketio import join_room, leave_room, emit
+
 from .app import app
 
 redis = app.config['SESSION_REDIS']
@@ -62,7 +65,8 @@ class Cardset(RedisModel):
 
 class Game(RedisModel):
     REDIS_PREFIX = 'games'
-    FIELDS = ['slug', 'state', 'cardset_slug', 'usernames', 'players']
+    FIELDS = ['slug', 'state', 'cardset_slug', 'usernames', 'players', 'player_hands', 'cards_played']
+    CARD_COUNT = 5
 
     class State:
         NOT_STARTED = 'not_started'
@@ -70,7 +74,7 @@ class Game(RedisModel):
         RESPONDING = 'responding'
         REVIEWING = 'reviewing'
 
-    def __init__(self, slug, cardset=None, cardset_slug=None, usernames=None, players=None, state=None):
+    def __init__(self, slug, cardset=None, cardset_slug=None, usernames=None, players=None, state=None, player_hands=None, cards_played=None):
         self.slug = slug
         self.state = state or self.__class__.State.NOT_STARTED
 
@@ -79,25 +83,48 @@ class Game(RedisModel):
         else:
             self.cardset = cardset
 
+        self.cards_played = cards_played or []
+        self.cards_remaining = set(self.cardset.response_cards) - set(self.cards_played)
+
         if not self.cardset:
             raise ValueError("Missing cardset")
 
         self.usernames = usernames or []
         self.players = players or []
+        self.player_hands = player_hands or {}
 
     @property
     def cardset_slug(self):
         return self.cardset.slug
 
-    def add_player(self, username):
-        if username not in self.players:
-            self.players.append(username)
+    def deal_cards(self, player):
+        ## Deal random cards from the deck
+        if player not in self.player_hands:
+            print("setting up player hand")
+            self.player_hands[player] = []
+
+        cards_dealt = set(
+            random.sample(
+                self.cards_remaining,
+                self.CARD_COUNT - len(self.player_hands[player])
+            )
+        )
+
+        if cards_dealt:
+            print("dealt cards")
+            self.cards_remaining = self.cards_remaining - cards_dealt
+            self.player_hands[player].extend(cards_dealt)
+
+    def add_player(self, player):
+        if player not in self.players:
+            self.players.append(player)
+            self.deal_cards(player)
             self.save()
             self.emit_state()
 
-    def remove_player(self, username):
-        if username in self.players:
-            self.players.remove(username)
+    def remove_player(self, player):
+        if player in self.players:
+            self.players.remove(player)
             self.save()
             self.emit_state()
 
@@ -115,6 +142,9 @@ class Game(RedisModel):
             self.usernames.remove(username)
             self.emit('chat', username + ' has left the room.')
         self.emit_state()
+
+    def send_deck(self, username):
+        return emit('send_deck', self.player_hands.get(username, {}))
 
     def emit(self, *args, **kwargs):
         print(f'emitting: {args} {kwargs} room={self.slug}')

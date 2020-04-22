@@ -1,0 +1,88 @@
+@font-face {
+  font-family: Fredoka;
+  src: url('/static/fonts/fredoka.ttf');
+}
+
+@font-face {
+  font-family: OpenSans;
+  src: url('/static/fonts/OpenSans-Regular.ttf');
+}
+
+/* https://coolors.co/9d44b5-b2b1cf-d7cdcc-badefc-ffffff */
+
+body {
+  background-color: #BADEFC;
+}
+
+.game-tile {
+   border: 2px solid black;
+   padding-bottom: 1em;
+   padding-top: 1em;
+   background-color: #444;
+   color: white;
+}
+
+#chat-tile {
+   height: 30em;
+   overflow:auto;
+   margin-top: 1em;
+   padding-top: 1em;
+   padding-bottom: 1em;
+   border: 2px solid black
+}
+
+#game-state {
+  height: 2em;
+  font-family: Fredoka;
+  font-size: 2em;
+}
+
+#game-area {
+  height: 15em;
+  padding: 1em 0em 1em 1em;
+}
+
+#my-deck {
+  margin-left: 2em;
+}
+
+.player-card {
+  padding: 1em .5em .5em 1em;
+}
+
+.player-card.up {
+  border-radius: 1em;
+  background-color: #D7CDCC;
+  border:.5em solid #9D44B5;
+  color: black;
+  font-family: OpenSans;
+  font-size: 1.2em;
+  height: 8em;
+  margin: 1em .5em .5em -2em;
+  width: 15em;
+  overflow: auto;
+}
+
+.player-card.down {
+  border-radius: .6em;
+  color: white;
+  text-align: center;
+  background-color: #9D44B5;
+  border:.3em solid #D7CDCC;
+  font-family: Fredoka;
+  font-size: 2em;
+  height: 4.8em;
+  margin: .6em .3em .3em -1.2em;
+  padding-top: 1.5em;
+  width: 9em;
+}
+
+.player-card.selected {
+  margin-top: .5em;
+}
+
+#title {
+  font-family: Fredoka;
+  font-size: 4em;
+  padding: .4em;
+}
