@@ -98,3 +98,7 @@ body {
   font-size: 4em;
   padding: .4em;
 }
+
+#title a{
+  color: white;
+}
