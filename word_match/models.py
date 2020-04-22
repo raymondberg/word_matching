@@ -62,7 +62,7 @@ class Cardset(RedisModel):
 
 class Game(RedisModel):
     REDIS_PREFIX = 'games'
-    FIELDS = ['slug', 'state', 'cardset_slug', 'usernames']
+    FIELDS = ['slug', 'state', 'cardset_slug', 'usernames', 'players']
 
     class State:
         NOT_STARTED = 'not_started'
@@ -70,7 +70,7 @@ class Game(RedisModel):
         RESPONDING = 'responding'
         REVIEWING = 'reviewing'
 
-    def __init__(self, slug, cardset=None, cardset_slug=None, usernames=None, state=None):
+    def __init__(self, slug, cardset=None, cardset_slug=None, usernames=None, players=None, state=None):
         self.slug = slug
         self.state = state or self.__class__.State.NOT_STARTED
 
@@ -83,10 +83,23 @@ class Game(RedisModel):
             raise ValueError("Missing cardset")
 
         self.usernames = usernames or []
+        self.players = players or []
 
     @property
     def cardset_slug(self):
         return self.cardset.slug
+
+    def add_player(self, username):
+        if username not in self.players:
+            self.players.append(username)
+            self.save()
+            self.emit_state()
+
+    def remove_player(self, username):
+        if username in self.players:
+            self.players.remove(username)
+            self.save()
+            self.emit_state()
 
     def add_user(self, username):
         join_room(self.slug)
@@ -99,7 +112,7 @@ class Game(RedisModel):
     def remove_user(self, username):
         leave_room(self.slug)
         if username in self.usernames:
-            self.usernames.pop(username)
+            self.usernames.remove(username)
             self.emit('chat', username + ' has left the room.')
         self.emit_state()
 
@@ -115,4 +128,4 @@ class Game(RedisModel):
         self.emit('game_state', self._state_details())
 
     def _state_details(self):
-        return {'state': self.state, 'users': self.usernames}
+        return {'state': self.state, 'users': self.usernames, 'players': self.players}

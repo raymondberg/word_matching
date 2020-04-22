@@ -37,15 +37,24 @@
       var dt = new Date();
       return dt.toLocaleTimeString();
     }
-    var game_id = "{{ game.slug }}";
+    var gameId = "{{ game.slug }}";
+    var myUsername = "{{ session['username'] }}";
     var socket = io();
     socket.on('connect', function() {
-      socket.emit('join', {room_id: '{{ game.slug}}'});
+      socket.emit('join', {room_id: gameId});
     });
 
     function sendChat() {
-      socket.emit('send_chat', {room_id: '{{ game.slug }}', message: $('#chat-input').val()})
+      socket.emit('send_chat', {room_id: gameId, message: $('#chat-input').val()})
       $('#chat-input').val("")
+    }
+
+    function deckUp() {
+      socket.emit('deck_up', {room_id: gameId})
+    }
+
+    function deckDown() {
+      socket.emit('deck_down', {room_id: gameId})
     }
 
     $(document).on('keypress',function(e) {
@@ -63,11 +72,36 @@
 
     socket.on('game_state', function(data) {
       $("#roster").empty();
-      data["users"].forEach(function (member) {
-        $("<div>" + member + "</div>").appendTo("#roster");
+      data.users.forEach(function (username) {
+        var userEntry = $("<div>", {class: "row"});
+        var userSummary = $("<div>", {class: "col-md-6"});
+        var userAction = $("<div>", {class: "col-md-6"});
+
+        if(username == myUsername) {
+          var button = $("<input/>", {type: "button"});
+          if(data.players.includes(username)) {
+              button.val("Sit out");
+              button.click(deckDown)
+          } else {
+              button.val("Deal me in");
+              button.click(deckUp)
+          }
+          button.appendTo(userAction);
+        } else {
+          if(data.players.includes(username)) {
+            userAction.text("Playing");
+          } else {
+            userAction.text("Watching");
+          }
+        }
+
+        userSummary.text(username)
+        userSummary.appendTo(userEntry);
+        userAction.appendTo(userEntry);
+        userEntry.appendTo("#roster");
       });
 
-      var state_text = "Not Started - Waiting for more players to deal in"
+      var state_text = "Not Started - Waiting for more players to deal in";
       $("#game-state").html(state_text);
     });
   </script>

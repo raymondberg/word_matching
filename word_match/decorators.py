@@ -30,6 +30,7 @@ def require_username_or_except(exception_type):
 
 require_username = require_username_or_except(None)
 
+
 def require_valid_game(f):
     def require_valid_game_(data, *args,**kwargs):
         room_id = data.get('room_id')
@@ -39,5 +40,3 @@ def require_valid_game(f):
         return f(data, *args, **kwargs, game=Game.from_slug(room_id))
 
     return require_valid_game_
-
-
