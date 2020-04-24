@@ -24,6 +24,17 @@ function deckDown() {
   playerActive = false;
 }
 
+function makeCard(up=False){
+    var cardElement = $("<div>", {class: 'player-card'});
+    if(up) {
+      cardElement.addClass('up');
+    } else {
+      cardElement.text("CardMatch!");
+      cardElement.addClass('down');
+    }
+    return cardElement;
+}
+
 $(document).on('keypress',function(e) {
   if(e.which == 13) {
     sendChat()
@@ -50,13 +61,12 @@ socket.on('send_deck', function(data) {
     return;
   }
   data.forEach(function (card) {
-    var cardElement = $("<div>", {class: 'player-card'});
+    var cardElement = makeCard(playerActive);
     if (playerActive) {
-      cardElement.html(card);
-      cardElement.addClass('up');
-    } else {
-      cardElement.text("CardMatch!");
-      cardElement.addClass('down');
+      cardElement.text(card);
+      cardElement.click(function () {
+        socket.emit('play_card', {room_id: gameId, card: card});
+      });
     }
     cardElement.appendTo("#my-deck");
   });
@@ -88,12 +98,16 @@ socket.on('game_state', function(data) {
         userAction.text("Watching");
       }
     }
-
     userSummary.text(username)
     userSummary.appendTo(userEntry);
     userAction.appendTo(userEntry);
     userEntry.appendTo("#roster");
   });
+
+  var cardCount = data.play_pile.length
+
+
+  $("#pile-status").text("There are " + cardCount + "cards in the pile");
 
   $("#game-state").text("Not Started");
   $("#game-help").text("Waiting for players");

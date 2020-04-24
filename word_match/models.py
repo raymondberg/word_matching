@@ -65,7 +65,7 @@ class Cardset(RedisModel):
 
 class Game(RedisModel):
     REDIS_PREFIX = 'games'
-    FIELDS = ['slug', 'state', 'cardset_slug', 'usernames', 'players', 'player_hands', 'cards_played']
+    FIELDS = ['slug', 'state', 'cardset_slug', 'usernames', 'play_pile', 'players', 'player_hands', 'cards_played']
     CARD_COUNT = 5
 
     class State:
@@ -74,7 +74,7 @@ class Game(RedisModel):
         RESPONDING = 'responding'
         REVIEWING = 'reviewing'
 
-    def __init__(self, slug, cardset=None, cardset_slug=None, usernames=None, players=None, state=None, player_hands=None, cards_played=None):
+    def __init__(self, slug, cardset=None, cardset_slug=None, usernames=None, play_pile=None, players=None, state=None, player_hands=None, cards_played=None):
         self.slug = slug
         self.state = state or self.__class__.State.NOT_STARTED
 
@@ -85,6 +85,7 @@ class Game(RedisModel):
 
         self.cards_played = cards_played or []
         self.cards_remaining = set(self.cardset.response_cards) - set(self.cards_played)
+        self.play_pile = play_pile or {}
 
         if not self.cardset:
             raise ValueError("Missing cardset")
@@ -114,6 +115,20 @@ class Game(RedisModel):
             print("dealt cards")
             self.cards_remaining = self.cards_remaining - cards_dealt
             self.player_hands[player].extend(cards_dealt)
+
+    def play_card(self, player, card):
+        if player in self.play_pile:
+            print("you've already played")
+            return
+        elif card not in self.player_hands.get(player, []):
+            print("no such card")
+            return
+
+        self.player_hands[player].remove(card)
+        self.play_pile[player] = card
+        self.deal_cards(player)
+        self.save()
+        self.emit_state()
 
     def add_player(self, player):
         if player not in self.players:
@@ -158,4 +173,4 @@ class Game(RedisModel):
         self.emit('game_state', self._state_details())
 
     def _state_details(self):
-        return {'state': self.state, 'users': self.usernames, 'players': self.players}
+        return {'state': self.state, 'users': self.usernames, 'players': self.players, 'play_pile': [None for c in self.play_pile.values()]}

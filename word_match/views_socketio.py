@@ -36,11 +36,18 @@ def handle_deck_down(data, username, game):
     game.remove_player(username)
     game.send_deck(username)
 
-@socketio.on('send_chat')
+@socketio.on('chat')
 @require_username_or_except(ConnectionRefusedError)
 @require_valid_game
 def handle_send_chat(data, username, game):
     print(f'received message from: {username} in {game.slug}: {data}')
     game.emit_chat(username, data.get('message'))
+
+@socketio.on('play_card')
+@require_username_or_except(ConnectionRefusedError)
+@require_valid_game
+def handle_play_card(data, username, game):
+    print(f'received card from: {username} in {game.slug}: {data.get("card")}')
+    game.play_card(username, data.get('card'))
 
 all_loaded = True
