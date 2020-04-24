@@ -1,5 +1,6 @@
 from flask import redirect, session
 
+from .app import socketio
 from .models import Cardset, Game
 
 def _is_gamemaster():
@@ -40,3 +41,12 @@ def require_valid_game(f):
         return f(data, *args, **kwargs, game=Game.from_slug(room_id))
 
     return require_valid_game_
+
+def in_game_action(action_type):
+  """someday use itertools"""
+  def in_game_action(f):
+      f = require_valid_game(f)
+      f = require_username_or_except(ConnectionRefusedError)(f)
+      f = socketio.on(action_type)(f)
+      return f
+  return in_game_action

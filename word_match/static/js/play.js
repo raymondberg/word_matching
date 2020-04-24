@@ -3,6 +3,9 @@ var socket = io();
 
 // Util Functions
 
+function isEmpty(data){
+  return Object.keys(data).length === 0 && data.constructor === Object
+}
 function getTime() {
   var dt = new Date();
   return dt.toLocaleTimeString();
@@ -13,7 +16,6 @@ function sendChat() {
   $('#chat-input').val("")
 }
 
-
 function deckUp() {
   socket.emit('deck_up', {room_id: gameId})
   playerActive = true;
@@ -22,6 +24,14 @@ function deckUp() {
 function deckDown() {
   socket.emit('deck_down', {room_id: gameId})
   playerActive = false;
+}
+
+function reviewCards() {
+  socket.emit('review_cards', {room_id: gameId})
+}
+
+function reset() {
+  socket.emit('reset', {room_id: gameId})
 }
 
 function makeCard(up=False){
@@ -57,7 +67,7 @@ socket.on('chat', function(data) {
 
 socket.on('send_deck', function(data) {
   $("#my-deck").empty();
-  if (Object.keys(data).length === 0 && data.constructor === Object) {
+  if (isEmpty(data)) {
     return;
   }
   data.forEach(function (card) {
@@ -104,10 +114,34 @@ socket.on('game_state', function(data) {
     userEntry.appendTo("#roster");
   });
 
-  var cardCount = data.play_pile.length
+  var playPileCount = data.play_pile.length
+  if(["responding", "reviewing"].includes(data.state)){
+    $("#pile-status").html(
+      "<h2>" + data.chooser + " is choosing</h2>" +
+      "<p>Cards in the pile</p>");
 
-
-  $("#pile-status").text("There are " + cardCount + "cards in the pile");
+    $("#card-field").empty()
+    if (! isEmpty(data.play_pile)) {
+      data.play_pile.forEach(function (card) {
+        console.log(card);
+        var cardElement = makeCard(card != null);
+        if(card != null) {
+          cardElement.text(card);
+          if(myUsername == data.chooser) {
+            cardElement.click(function () { socket.emit('choose_card', { room_id: gameId, card: card }) });
+          }
+        }
+        cardElement.appendTo($("#card-field"));
+      });
+    }
+    if(myUsername == data.chooser) {
+      var reviewButton = $("<input type='button' style='text-align:center' value='Review " + playPileCount + " cards'/>");
+      reviewButton.click(function () { reviewCards() } );
+      reviewButton.appendTo($("#pile-status"));
+    } else {
+      $("<h1 style='text-align:center'>" + playPileCount + "</h1>").appendTo($("#pile-status"));
+    }
+  }
 
   $("#game-state").text("Not Started");
   $("#game-help").text("Waiting for players");
