@@ -46,6 +46,9 @@ socket.on('chat', function(data) {
 
 socket.on('send_deck', function(data) {
   $("#my-deck").empty();
+  if (Object.keys(data).length === 0 && data.constructor === Object) {
+    return;
+  }
   data.forEach(function (card) {
     var cardElement = $("<div>", {class: 'player-card'});
     if (playerActive) {
