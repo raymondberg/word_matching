@@ -60,7 +60,8 @@ socket.on('connect', function() {
 });
 
 socket.on('reload', function() {
-  location.reload();
+  socket.disconnect();
+  location.reload(true);
 });
 
 socket.on('chat', function(data) {
