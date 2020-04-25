@@ -56,6 +56,7 @@ body {
 
 .player-card {
   padding: 1em .5em .5em 1em;
+  cursor: pointer;
 }
 
 .player-card a {

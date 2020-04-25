@@ -73,7 +73,7 @@ socket.on('send_deck', function(data) {
   data.forEach(function (card) {
     var cardElement = makeCard(playerActive);
     if (playerActive) {
-      cardElement.text(card);
+      cardElement.html(card);
       cardElement.click(function () {
         socket.emit('play_card', {room_id: gameId, card: card});
       });
@@ -126,7 +126,7 @@ socket.on('game_state', function(data) {
         console.log(card);
         var cardElement = makeCard(card != null);
         if(card != null) {
-          cardElement.text(card);
+          cardElement.html(card);
           if(myUsername == data.chooser) {
             cardElement.click(function () { socket.emit('choose_card', { room_id: gameId, card: card }) });
           }
