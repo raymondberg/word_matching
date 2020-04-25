@@ -59,6 +59,10 @@ socket.on('connect', function() {
   socket.emit('join', {room_id: gameId});
 });
 
+socket.on('reload', function() {
+  location.reload();
+});
+
 socket.on('chat', function(data) {
   $("<div>" + data + " (" + getTime() + ")</div>").appendTo("#chat-messages");
   var container = $("#chat-messages");
