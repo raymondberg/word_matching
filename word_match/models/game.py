@@ -173,7 +173,7 @@ class Game(RedisModel):
         self.players = []
         self.player_hands = {}
         self.state = None
-        self.username = []
+        self.usernames = []
         self.cards_played = []
         self.cards_remaining = []
         self.save()
