@@ -36,8 +36,8 @@ function reset() {
   socket.emit('reset', {room_id: gameId})
 }
 
-function makeCard(up=False){
-    var cardElement = $("<div>", {class: 'player-card'});
+function makeCard(up=false, prompt=false){
+    var cardElement = $("<div>", {class: (prompt) ? 'prompt-card':'player-card'});
     if(up) {
       cardElement.addClass('up');
     } else {
@@ -129,8 +129,7 @@ socket.on('game_state', function(data) {
   var playPileCount = data.play_pile.length
   if(["responding", "reviewing"].includes(data.state)){
     $("#pile-status").html(
-      "<h2>" + data.chooser + " is choosing</h2>" +
-      "<p>Cards in the pile</p>");
+      "<h2>" + data.chooser + " is choosing</h2>");
 
     $("#card-field").empty()
     if (! isEmpty(data.play_pile)) {
@@ -150,9 +149,10 @@ socket.on('game_state', function(data) {
       var reviewButton = $("<input type='button' style='text-align:center' value='Review " + playPileCount + " cards'/>");
       reviewButton.click(function () { reviewCards() } );
       reviewButton.appendTo($("#pile-status"));
-    } else {
-      $("<h1 style='text-align:center'>" + playPileCount + "</h1>").appendTo($("#pile-status"));
     }
+    makeCard(up=true, prompt=true)
+      .html($("<h4/>").text(data.prompt_card))
+      .appendTo($("#pile-status"));
   } else if (data.state == "not_started"){
     $("#pile-status").html(
       "<h2> Not Started </h2>" +

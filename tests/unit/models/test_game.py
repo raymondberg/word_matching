@@ -32,11 +32,13 @@ def cardset(prompt_cards, response_cards):
 
 @pytest.fixture
 def fresh_game(cardset):
-    return Game(
+    game = Game(
         slug="test",
         cardset=cardset,
         usernames=["Player1", "Player2"],
     )
+    game.CARD_COUNT = 1
+    return game
 
 
 def test_game_throws_error_without_cardset(cardset, response_cards):
@@ -68,3 +70,13 @@ def test_chat_emits_chat(fresh_game, socketio_emit):
 def test_chat_doesnt_work_for_game(game_user, fresh_game, socketio_emit):
     fresh_game.chat(game_user, "a message")
     socketio_emit.assert_not_called()
+
+
+def test_game_starts_with_two_players(fresh_game, prompt_cards, socketio_emit):
+    fresh_game.add_player("Player1")
+    fresh_game.add_player("Player2")
+
+    assert fresh_game.state == Game.State.RESPONDING
+    assert fresh_game.chooser == "Player1"
+    assert fresh_game.prompt_card in prompt_cards
+    socketio_emit.assert_called_with({})

@@ -48,7 +48,7 @@ def cardsets_create():
         cardset_data = json.load(upload)
         if cardset_data.get('response_cards') and cardset_data.get('prompt_cards'):
             Cardset(
-                name=request.form.get('name') or random_string(4),
+                name=request.form.get('name'),
                 prompt_cards=cardset_data['prompt_cards'],
                 response_cards=cardset_data['response_cards']
             ).save()

@@ -9,12 +9,14 @@ class Game(RedisModel):
     REDIS_PREFIX = 'games'
     FIELDS = [
         'slug',
-        'cards_played',
         'cardset_slug',
         'chooser',
         'play_pile',
         'player_hands',
         'players',
+        'prompt_card',
+        'prompt_cards_played',
+        'response_cards_played',
         'state',
         'usernames',
     ]
@@ -25,26 +27,40 @@ class Game(RedisModel):
         RESPONDING = 'responding'
         REVIEWING = 'reviewing'
 
-    def __init__(self, slug, chooser=None, cardset=None, cardset_slug=None, usernames=None, play_pile=None, players=None, state=None, player_hands=None, cards_played=None):
+    def __init__(self,
+                 slug,
+                 cardset=None,
+                 cardset_slug=None,
+                 chooser=None,
+                 play_pile=None,
+                 player_hands=None,
+                 players=None,
+                 prompt_card=None,
+                 prompt_cards_played=None,
+                 response_cards_played=None,
+                 state=None,
+                 usernames=None,
+    ):
         self.slug = slug
+
+        self.chooser = chooser
+        self.play_pile = play_pile or {}
+        self.player_hands = player_hands or {}
+        self.players = players or []
+        self.prompt_card = prompt_card or None
+        self.prompt_cards_played = prompt_cards_played or []
+        self.response_cards_played = response_cards_played or []
         self.state = state or self.__class__.State.NOT_STARTED
+        self.usernames = usernames or []
 
         if cardset_slug:
             self.cardset = Cardset.from_slug(cardset_slug)
         else:
             self.cardset = cardset
-
-        self.chooser = chooser
-        self.cards_played = cards_played or []
-        self.cards_remaining = set(self.cardset.response_cards) - set(self.cards_played)
-        self.play_pile = play_pile or {}
-
         if not self.cardset:
             raise ValueError("Missing cardset")
-
-        self.usernames = usernames or []
-        self.players = players or []
-        self.player_hands = player_hands or {}
+        self.prompt_cards_remaining = set(self.cardset.prompt_cards) - set(self.prompt_cards_played)
+        self.response_cards_remaining = set(self.cardset.response_cards) - set(self.response_cards_played)
 
     @property
     def cardset_slug(self):
@@ -58,14 +74,14 @@ class Game(RedisModel):
 
         cards_dealt = set(
             random.sample(
-                self.cards_remaining,
+                self.response_cards_remaining,
                 self.CARD_COUNT - len(self.player_hands[player])
             )
         )
 
         if cards_dealt:
             print("dealt cards")
-            self.cards_remaining = self.cards_remaining - cards_dealt
+            self.response_cards_remaining = self.response_cards_remaining - cards_dealt
             self.player_hands[player].extend(cards_dealt)
 
     def play_card(self, player, card):
@@ -95,11 +111,9 @@ class Game(RedisModel):
 
     def start_if_ready(self):
         if len(self.players) > 1 and self.state == Game.State.NOT_STARTED:
-            self.chooser = self.players[0]
-            self.state = Game.State.RESPONDING
-            self.emit(f"{self.chooser} is ready for your cards!")
-        elif self.state == Game.State.RESPONDING and self.chooser is None:
-            self.chooser = self.players[0]
+            self.start_responding(self.players[0])
+        elif self.state == Game.State.RESPONDING and (self.chooser is None or self.prompt_card is None):
+            self.start_responding(self.players[0])
 
     def enter_review_and_save(self, player):
         if self.chooser != player:
@@ -121,13 +135,18 @@ class Game(RedisModel):
             print("no such card")
 
         winning_player = next(p for p,c in self.play_pile.items() if c == card)
-        self.chooser = winning_player
         self.play_pile = {}
-        self.state = Game.State.RESPONDING
+        self.start_responding(winning_player)
         self.save()
         self.emit(f"{self.chooser} has won best card! It's their turn to choose")
         self.emit_state()
 
+    def start_responding(self, choosing_player):
+        self.chooser = choosing_player
+        self.state = Game.State.RESPONDING
+        self.prompt_card = random.sample(self.prompt_cards_remaining, 1)[0]
+        self.prompt_cards_played.append(self.prompt_card)
+        self.emit(f"{self.chooser} is ready for your cards!")
 
     def remove_player(self, player):
         if player in self.players:
@@ -174,8 +193,8 @@ class Game(RedisModel):
         self.player_hands = {}
         self.state = None
         self.usernames = []
-        self.cards_played = []
-        self.cards_remaining = []
+        self.response_cards_played = []
+        self.response_cards_remaining = []
         self.save()
         self.emit(f"{username} has reset the game")
         self.emit_refresh()
@@ -189,6 +208,7 @@ class Game(RedisModel):
             'chooser': self.chooser,
             'play_pile': play_pile,
             'players': self.players,
+            'prompt_card': self.prompt_card,
             'state': self.state,
             'users': self.usernames,
         }

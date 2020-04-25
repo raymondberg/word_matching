@@ -52,9 +52,9 @@ body {
 
 .game-tile h1,
 .game-tile h2,
-.game-tile h3 {
+.game-tile h3,
+.game-tile h4 {
   font-family: Fredoka;
-  font-size: 2em;
 }
 
 .game-tile a {
@@ -74,7 +74,7 @@ body {
  }
 
 #roster {
-  height: 15em;
+  height: 18em;
 }
 
 #game-area {
@@ -84,11 +84,12 @@ body {
 #card-field {
   padding-left: 4em;
   overflow: auto;
-  height: 17em;
+  height: 20em;
 }
 
 #my-deck {
   margin-left: 2em;
+  height:22em;
 }
 
 .player-card {
@@ -125,6 +126,21 @@ body {
   padding-top: 1.5em;
   text-align: center;
   width: 9em;
+}
+
+.prompt-card {
+  background-color: #D7CDCC;
+  border-radius: 1em;
+  border:.5em solid #449DB5;
+  color: black;
+  font-family: OpenSans;
+  font-size: 1.2em;
+  height: 12em;
+  margin: 1em .5em .5em -.5em;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: .5em 0em 0em .5em;
+  width: 10em;
 }
 
 .player-card.selected {
