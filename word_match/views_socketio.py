@@ -27,10 +27,10 @@ def handle_deck_down(data, username, game):
     game.remove_player(username)
     game.send_deck(username)
 
-@in_game_action('chat')
+@in_game_action('send_chat')
 def handle_send_chat(data, username, game):
     print(f'received message from: {username} in {game.slug}: {data}')
-    game.emit_chat(username, data.get('message'))
+    game.chat(username, data.get('message'))
 
 @in_game_action('play_card')
 def handle_play_card(data, username, game):
@@ -43,12 +43,12 @@ def handle_review_cards(data, username, game):
     game.enter_review_and_save(username)
 
 @in_game_action('choose_card')
-def handle_review_cards(data, username, game):
+def handle_choose_card(data, username, game):
     print(f'received choose_cards from: {username} in {game.slug}: {data.get("card")}')
     game.choose_card(username, data.get("card"))
 
 @in_game_action('reset')
-def handle_review_cards(data, username, game):
+def handle_reset(data, username, game):
     print(f'received choose_cards from: {username} in {game.slug}: {data.get("card")}')
     game.reset(username)
 

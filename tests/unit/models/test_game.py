@@ -60,5 +60,11 @@ def test_game_has_reasonable_defaults(cardset, response_cards):
 
 
 def test_chat_emits_chat(fresh_game, socketio_emit):
-    fresh_game.emit_chat("Player1", "a message")
+    fresh_game.chat("Player1", "a message")
     socketio_emit.assert_called_with("chat", "Player1: a message", room=fresh_game.slug)
+
+
+@pytest.mark.parametrize("game_user", ['game', 'GaMe'])
+def test_chat_doesnt_work_for_game(game_user, fresh_game, socketio_emit):
+    fresh_game.chat(game_user, "a message")
+    socketio_emit.assert_not_called()

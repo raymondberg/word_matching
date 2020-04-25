@@ -97,7 +97,7 @@ class Game(RedisModel):
         if len(self.players) > 1 and self.state == Game.State.NOT_STARTED:
             self.chooser = self.players[0]
             self.state = Game.State.RESPONDING
-            self.emit_chat("Game", f"{self.chooser} is ready for your cards!")
+            self.emit_chat(f"{self.chooser} is ready for your cards!")
         elif self.state == Game.State.RESPONDING and self.chooser is None:
             self.chooser = self.players[0]
 
@@ -110,7 +110,7 @@ class Game(RedisModel):
             return
         self.state = Game.State.REVIEWING
         self.save()
-        self.emit_chat("Game", f"{self.chooser} has started reviewing")
+        self.emit_chat(f"{self.chooser} has started reviewing")
         self.emit_state()
 
     def choose_card(self, player, card):
@@ -125,7 +125,7 @@ class Game(RedisModel):
         self.play_pile = {}
         self.state = Game.State.RESPONDING
         self.save()
-        self.emit_chat("Game", f"{self.chooser} has won best card! It's their turn to choose")
+        self.emit(f"{self.chooser} has won best card! It's their turn to choose")
         self.emit_state()
 
 
@@ -157,8 +157,8 @@ class Game(RedisModel):
         print(f'emitting: {args} {kwargs} room={self.slug}')
         emit(*args, **kwargs, room=self.slug)
 
-    def emit_chat(self, username, message):
-        if message:
+    def chat(self, username, message):
+        if message and username.upper() != "GAME":
             self.emit('chat', f'{username}: {message}')
 
     def emit_state(self):
@@ -173,7 +173,7 @@ class Game(RedisModel):
         self.cards_played = []
         self.cards_remaining = []
         self.save()
-        self.emit_chat("Game", f"{username} has reset the game")
+        self.emit_chat(f"{username} has reset the game")
         self.emit_state()
 
     def _state_details(self):

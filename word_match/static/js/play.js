@@ -8,7 +8,9 @@ function isEmpty(data){
 }
 function getTime() {
   var dt = new Date();
-  return dt.toLocaleTimeString();
+  const hours = dt.getHours();
+  const actual_hours = (hours % 12 == 0) ? 12 : hours;
+  return actual_hours + ":" + dt.getMinutes().toString().padStart(2, "0") + (hours < 12 ? "am": "pm");
 }
 
 function sendChat() {
@@ -58,11 +60,12 @@ socket.on('connect', function() {
 });
 
 socket.on('chat', function(data) {
-  $("<div>" + getTime() + ": " + data + "</div>").appendTo("#chat-box");
-  console.log($("#chat-box").children().length);
-  if ($("#chat-box").children().length > 10) {
-    $("#chat-box").children()[0].remove();
+  $("<div>" + data + " (" + getTime() + ")</div>").appendTo("#chat-messages");
+  var container = $("#chat-messages");
+  if (container.children().length > 20) {
+    container.children()[0].remove();
   }
+  container.scrollTop(9999999);
 });
 
 socket.on('send_deck', function(data) {
