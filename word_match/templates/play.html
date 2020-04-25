@@ -3,23 +3,21 @@
 
 {% block content %}
   <div class="row">
-    <div class="col-md-9" style="padding-right: 0">
+    <div class="col-md-9" id="left-container">
       <div class="container game-tile">
         <div id="game-area" class="row">
           <div id="pile-status" class="col-md-3">
           </div>
-          <div class="col-md-9" style="overflow: auto">
-            <div id="card-field" style="margin-left: 5em">
+          <div class="col-md-9">
+            <div id="card-field">
             </div>
           </div>
         </div>
         <div id="my-deck" class="row"></div>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3" id="right-container">
       <div class="container game-tile">
-        <div id="game-state"></div>
-        <div id="game-help"></div>
         <h3> Players: </h3>
         <div id="roster">
         </div>

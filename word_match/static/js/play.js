@@ -9,7 +9,7 @@ function isEmpty(data){
 function getTime() {
   var dt = new Date();
   const hours = dt.getHours();
-  const actual_hours = (hours % 12 == 0) ? 12 : hours;
+  const actual_hours = (hours % 12 == 0) ? 12 : hours % 12;
   return actual_hours + ":" + dt.getMinutes().toString().padStart(2, "0") + (hours < 12 ? "am": "pm");
 }
 
@@ -65,7 +65,11 @@ socket.on('reload', function() {
 });
 
 socket.on('chat', function(data) {
-  $("<div>" + data + " (" + getTime() + ")</div>").appendTo("#chat-messages");
+  var newChatMessage = $("<div/>");
+  $("<div/>", {"class": "chat-time"}).text(getTime()).appendTo(newChatMessage);
+  $("<div/>").text(data).appendTo(newChatMessage);
+  newChatMessage.appendTo("#chat-messages");
+
   var container = $("#chat-messages");
   if (container.children().length > 20) {
     container.children()[0].remove();
@@ -149,8 +153,9 @@ socket.on('game_state', function(data) {
     } else {
       $("<h1 style='text-align:center'>" + playPileCount + "</h1>").appendTo($("#pile-status"));
     }
+  } else if (data.state == "not_started"){
+    $("#pile-status").html(
+      "<h2> Not Started </h2>" +
+      "<p>Players must use the &quot;Deal me In&quot; buttons on the right.</p>");
   }
-
-  $("#game-state").text("Not Started");
-  $("#game-help").text("Waiting for players");
 });

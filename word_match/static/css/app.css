@@ -17,12 +17,44 @@ body {
 .space-up { margin-top: 1em }
 .pad-left { padding-left: 1em }
 
+#title {
+  font-family: Fredoka;
+  font-size: 4em;
+  padding: .4em;
+}
+
+#title a{
+  color: white;
+}
+
+.dark-background {
+  background-color: #444;
+}
+
+/* PLAY */
+
+#left-container { 
+  padding-right: 0em;
+}
+
+#right-container { 
+  padding-left: 0em;
+}
+
 .game-tile {
    border: 2px solid black;
    padding-bottom: 1em;
    padding-top: 1em;
+   font-family: OpenSans;
    background-color: #444;
    color: white;
+}
+
+.game-tile h1,
+.game-tile h2,
+.game-tile h3 {
+  font-family: Fredoka;
+  font-size: 2em;
 }
 
 .game-tile a {
@@ -31,26 +63,28 @@ body {
 }
 
 #chat-tile {
-   margin-top: 1em;
    padding-top: 1em;
    padding-bottom: 1em;
    border: 2px solid black
 }
 
 #chat-messages {
-   height: 20em;
+   height: 15em;
    overflow:auto;
  }
 
-#game-state {
-  height: 2em;
-  font-family: Fredoka;
-  font-size: 2em;
+#roster {
+  height: 15em;
 }
 
 #game-area {
-  /* height: 15em; */
   padding: 1em 0em 1em 1em;
+}
+
+#card-field {
+  padding-left: 4em;
+  overflow: auto;
+  height: 17em;
 }
 
 #my-deck {
@@ -80,16 +114,16 @@ body {
 }
 
 .player-card.down {
-  border-radius: .6em;
-  color: white;
-  text-align: center;
   background-color: #9D44B5;
+  border-radius: .6em;
   border:.3em solid #D7CDCC;
+  color: white;
   font-family: Fredoka;
   font-size: 2em;
   height: 4.8em;
   margin: .6em .3em .3em -1.2em;
   padding-top: 1.5em;
+  text-align: center;
   width: 9em;
 }
 
@@ -97,12 +131,6 @@ body {
   margin-top: .5em;
 }
 
-#title {
-  font-family: Fredoka;
-  font-size: 4em;
-  padding: .4em;
-}
-
-#title a{
-  color: white;
+.chat-time {
+  float: right;
 }
