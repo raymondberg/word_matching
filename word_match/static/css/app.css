@@ -83,7 +83,7 @@ body {
 
 #card-field {
   padding-left: 2em;
-  height: 20em;
+  min-height: 20em;
 }
 
 #my-deck {
