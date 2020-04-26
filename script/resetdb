@@ -1,1 +1,5 @@
-docker exec -it word_match_redis redis-cli FLUSHALL
+if [ -z "${SESSION_STORE:-}" ]; then
+  docker exec -it word_match_redis redis-cli FLUSHALL
+else
+  pipenv run python -c "from word_match.models.base import STORE; STORE.flushdb()"
+fi
