@@ -95,7 +95,9 @@ class Game(RedisModel):
             print("no such card")
             return
 
+        print(f"{player} has {self.player_hands[player]}")
         self.player_hands[player].remove(card)
+        print(f"{player} has {self.player_hands[player]}")
         self.play_pile[player] = card
         self.deal_cards(player)
         self.save()
