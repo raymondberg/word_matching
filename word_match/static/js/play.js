@@ -47,6 +47,10 @@ function makeCard(up=false, prompt=false){
     return cardElement;
 }
 
+function gameActive(state) {
+  return ["responding", "reviewing"].includes(state)
+}
+
 $(document).on('keypress',function(e) {
   if(e.which == 13) {
     sendChat()
@@ -115,9 +119,15 @@ socket.on('game_state', function(data) {
       button.appendTo(userAction);
     } else {
       if(data.players.includes(username)) {
-        userAction.text("Playing");
+        if(data.players_responded.includes(username)){
+          userAction.text("Responded");
+        } else if (data.chooser == username) {
+          userAction.text("Choosing");
+        } else if (gameActive(data.state)) {
+          userAction.text("Still Thinking");
+        }
       } else {
-        userAction.text("Watching");
+        userAction.text("Just Watching");
       }
     }
     userSummary.text(username)
@@ -127,7 +137,7 @@ socket.on('game_state', function(data) {
   });
 
   var playPileCount = data.play_pile.length
-  if(["responding", "reviewing"].includes(data.state)){
+  if(gameActive(data.state)){
     $("#pile-status").html(
       "<h2>" + data.chooser + " is choosing</h2>");
 
