@@ -89,8 +89,7 @@ body {
 
 #my-deck {
   margin-left: 2em;
-  height:22em;
-  overflow: auto;
+  min-height: 22em;
 }
 
 .player-card {
