@@ -82,8 +82,7 @@ body {
 }
 
 #card-field {
-  padding-left: 4em;
-  overflow: auto;
+  padding-left: 2em;
   height: 20em;
 }
 
