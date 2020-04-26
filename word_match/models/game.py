@@ -102,6 +102,7 @@ class Game(RedisModel):
         self.deal_cards(player)
         self.save()
         self.emit_state()
+        self.send_deck()
 
     def add_player(self, player):
         if player not in self.players:
