@@ -79,4 +79,4 @@ def test_game_starts_with_two_players(fresh_game, prompt_cards, socketio_emit):
     assert fresh_game.state == Game.State.RESPONDING
     assert fresh_game.chooser == "Player1"
     assert fresh_game.prompt_card in prompt_cards
-    socketio_emit.assert_called_with({})
+    socketio_emit.assert_called_with('game_state', {'chooser': 'Player1', 'play_pile': [], 'players': ['Player1', 'Player2'], 'prompt_card': 'Slithy', 'state': 'responding', 'users': ['Player1', 'Player2']}, room='test')
