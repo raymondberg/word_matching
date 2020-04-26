@@ -205,6 +205,7 @@ class Game(RedisModel):
     def _state_details(self):
         if self.state == Game.State.REVIEWING:
             play_pile = [c for c in self.play_pile.values()]
+            random.shuffle(play_pile)
         else:
             play_pile = [None for c in self.play_pile.values()]
         return {
