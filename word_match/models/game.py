@@ -59,30 +59,36 @@ class Game(RedisModel):
             self.cardset = cardset
         if not self.cardset:
             raise ValueError("Missing cardset")
-        self.prompt_cards_remaining = set(self.cardset.prompt_cards) - set(self.prompt_cards_played)
-        self.response_cards_remaining = set(self.cardset.response_cards) - set(self.response_cards_played)
 
     @property
     def cardset_slug(self):
         return self.cardset.slug
 
-    def deal_cards(self, player):
-        ## Deal random cards from the deck
-        if player not in self.player_hands:
-            print("setting up player hand")
-            self.player_hands[player] = []
+    @property
+    def prompt_cards_remaining(self):
+        return set(self.cardset.prompt_cards) - set(self.prompt_cards_played)
 
+    @property
+    def response_cards_remaining(self):
+        return set(self.cardset.response_cards) - set(self.response_cards_played)
+
+    def player_hand(self, player):
+        if player not in self.player_hands:
+            self.player_hands[player] = []
+        return self.player_hands.get(player, [])
+
+    def deal_cards(self, player):
+        player_hand = self.player_hand(player)
         cards_dealt = set(
             random.sample(
                 self.response_cards_remaining,
-                self.CARD_COUNT - len(self.player_hands[player])
+                self.CARD_COUNT - len(player_hand)
             )
         )
 
         if cards_dealt:
-            print("dealt cards")
-            self.response_cards_remaining = self.response_cards_remaining - cards_dealt
-            self.player_hands[player].extend(cards_dealt)
+            player_hand.extend(cards_dealt)
+            self.response_cards_played.extend(cards_dealt)
 
     def play_card(self, player, card):
         if player in self.play_pile:
@@ -91,13 +97,15 @@ class Game(RedisModel):
         if player == self.chooser:
             print("choosers can't play")
             return
-        elif card not in self.player_hands.get(player, []):
+
+        player_hand = self.player_hand(player)
+        if card not in player_hand:
             print("no such card")
             return
 
-        print(f"{player} has {self.player_hands[player]}")
-        self.player_hands[player].remove(card)
-        print(f"{player} has {self.player_hands[player]}")
+        print(f"{player} has {player_hand}")
+        player_hand.remove(card)
+        print(f"{player} has {player_hand}")
         self.play_pile[player] = card
         self.deal_cards(player)
         self.save()
@@ -196,8 +204,8 @@ class Game(RedisModel):
         self.player_hands = {}
         self.state = None
         self.usernames = []
+        self.prompt_cards_played = []
         self.response_cards_played = []
-        self.response_cards_remaining = []
         self.save()
         self.emit(f"{username} has reset the game")
         self.emit_refresh()

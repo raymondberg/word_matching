@@ -54,8 +54,9 @@ def test_game_has_reasonable_defaults(cardset, response_cards):
 
     assert game.state == Game.State.NOT_STARTED
     assert game.cardset == cardset
-    assert game.cards_played == []
-    assert game.cards_remaining == set(response_cards)
+    assert game.prompt_cards_played == []
+    assert game.response_cards_played == []
+    assert game.response_cards_remaining == set(response_cards)
     assert game.players == []
     assert game.player_hands == {}
     assert game.play_pile == {}
@@ -79,4 +80,23 @@ def test_game_starts_with_two_players(fresh_game, prompt_cards, socketio_emit):
     assert fresh_game.state == Game.State.RESPONDING
     assert fresh_game.chooser == "Player1"
     assert fresh_game.prompt_card in prompt_cards
-    socketio_emit.assert_called_with('game_state', {'chooser': 'Player1', 'play_pile': [], 'players': ['Player1', 'Player2'], 'prompt_card': 'Slithy', 'state': 'responding', 'users': ['Player1', 'Player2']}, room='test')
+
+    event_emitted, data = socketio_emit.call_args_list[-1].args
+    assert event_emitted == 'game_state'
+    assert data["chooser"] == "Player1"
+    assert not data["play_pile"]
+    assert not data["players_responded"]
+    assert data["players"] == data["users"] == ["Player1", "Player2"]
+    assert data["state"] == Game.State.RESPONDING
+
+
+def test_dealt_cards_removed_from_game(fresh_game, prompt_cards, socketio_emit):
+    fresh_game.add_player("Player1")
+    fresh_game.deal_cards("Player1")
+    fresh_game.add_player("Player2")
+    fresh_game.deal_cards("Player2")
+
+    p1_cards = set(fresh_game.player_hands["Player1"])
+    assert p1_cards.intersection(fresh_game.response_cards_played)
+    # p1_cards = set(fresh_game.player_hand("Player1"))
+    # assert p1_cards.intersection(fresh_game.response_cards_played)
