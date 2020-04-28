@@ -96,7 +96,5 @@ def test_dealt_cards_removed_from_game(fresh_game, prompt_cards, socketio_emit):
     fresh_game.add_player("Player2")
     fresh_game.deal_cards("Player2")
 
-    p1_cards = set(fresh_game.player_hands["Player1"])
+    p1_cards = set(fresh_game.player_hand("Player1"))
     assert p1_cards.intersection(fresh_game.response_cards_played)
-    # p1_cards = set(fresh_game.player_hand("Player1"))
-    # assert p1_cards.intersection(fresh_game.response_cards_played)
