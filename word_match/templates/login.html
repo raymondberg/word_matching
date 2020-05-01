@@ -1,13 +1,22 @@
-<form action="/login" method="post">
-  <p>
-    <div>What is your name?: <input type="text" name="username"/></div>
-  </p>
-  <p>
-    <h4>Gamemasters only</h4>
-    <div>Enter your game code: <input type="text" name="game_code"/></div>
-    <div>Don't know what this is? Don't panic! Just leave it blank.</div>
-  </p>
-  <p>
-    <input type="submit" value="Update name!"/>
-  </p>
-</form>
+<div class="container">
+  <form action="/login" method="post">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="text-center">
+          <h4>Players</h4>
+          <div>What is your name?: <input type="text" name="username"/></div>
+          <hr/>
+          <input type="submit" value="Login as player" style="margin-bottom: 3em"/>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="text-center">
+          <h4>Gamemasters only</h4>
+          <div>Enter your game code: <input type="text" name="game_code"/></div>
+          <hr/>
+          <input type="submit" value="Login as Gamemaster"/>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
