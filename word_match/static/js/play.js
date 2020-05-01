@@ -102,8 +102,8 @@ socket.on('game_state', function(data) {
   $("#roster").empty();
   data.users.forEach(function (username) {
     var userEntry = $("<div>", {class: "row"});
-    var userSummary = $("<div>", {class: "col-md-6"});
-    var userAction = $("<div>", {class: "col-md-6"});
+    var userSummary = $("<div>", {class: "col-6"});
+    var userAction = $("<div>", {class: "col-6"});
 
     if(username == myUsername) {
       var button = $("<input/>", {type: "button"});
@@ -163,6 +163,11 @@ socket.on('game_state', function(data) {
     makeCard(up=true, prompt=true)
       .html($("<h4/>").text(data.prompt_card))
       .appendTo($("#pile-status"));
+    if(myUsername == data.chooser || data.players_responded.includes(myUsername)){
+      $("#my-deck").addClass("played");
+    } else {
+      $("#my-deck").removeClass("played");
+    }
   } else if (data.state == "not_started"){
     $("#pile-status").html(
       "<h2> Not Started </h2>" +

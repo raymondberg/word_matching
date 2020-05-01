@@ -74,7 +74,7 @@ body {
  }
 
 #roster {
-  height: 18em;
+  min-height: 18em;
 }
 
 #game-area {
@@ -148,4 +148,26 @@ body {
 
 .chat-time {
   float: right;
+}
+
+/* Small Screen */
+
+@media screen and (max-width: 980px) {
+  #title {
+    font-family: Fredoka;
+    font-size: 2em;
+    padding: .4em;
+  }
+
+  #roster {
+    min-height: 1em;
+  }
+
+  .played {
+    display: none;
+  }
+
+  #chat-tile {
+    display: None;
+  }
 }

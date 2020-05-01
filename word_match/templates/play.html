@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="col-md-3" id="right-container">
-      <div class="container game-tile">
+      <div class="container game-tile" id="roster-tile">
         <h3> Players: </h3>
         <div id="roster">
         </div>
@@ -32,6 +32,9 @@
         <div id="chat-box">
           <input type="text" id="chat-input"/>
           <input type="button" value=">>" onclick="sendChat()"/>
+        </div>
+        <div>
+          <a href="{{ url_for('play_mobile', game_slug=game.slug) }}" style="color: white;">Switch to Mobile version</a>
         </div>
       </div>
     </div>

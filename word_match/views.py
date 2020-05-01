@@ -73,13 +73,22 @@ def create_game():
         Game(slug=slug, cardset=cardset).save()
     return redirect('/')
 
-@app.route('/games/<string:game_slug>')
 @require_username
+@app.route('/games/<string:game_slug>')
 def play(game_slug, **kwargs):
     safe_slug = alphanumeric_only(game_slug)
     if not Game.slug_exists(safe_slug):
         return redirect('/')
 
     return render_template('play.html', game=Game.from_slug(safe_slug))
+
+@require_username
+@app.route('/games/<string:game_slug>/mobile')
+def play_mobile(game_slug, **kwargs):
+    safe_slug = alphanumeric_only(game_slug)
+    if not Game.slug_exists(safe_slug):
+        return redirect('/')
+
+    return render_template('play_mobile.html', game=Game.from_slug(safe_slug))
 
 all_loaded = True
